@@ -3,40 +3,42 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center mb-0">Operation Result</h2>
+        <div class="glass-card text-center shadow-lg">
+            <div class="card-header py-3">
+                <h3 class="mb-0"><i class="fas fa-poll-h me-2"></i>Operation Result</h3>
             </div>
-            <div class="card-body text-center">
-
+            <div class="card-body p-5">
                 {% if encoded_image %}
-                <div class="alert alert-success" role="alert">
-                    <h4 class="alert-heading">Message Hidden Successfully!</h4>
-                    <p>Your secret message has been encoded into the image below.</p>
+                <div class="mb-4">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4 class="card-title text-success">Encoding Successful!</h4>
+                    <p class="card-text mb-4">Your message has been securely hidden inside the image.</p>
+
+                    <div class="mb-4">
+                        <img src="data:image/png;base64,{{ encoded_image }}" alt="Encoded Image"
+                            class="img-fluid rounded shadow-sm border border-secondary" style="max-height: 400px;">
+                    </div>
+
+                    <a href="data:image/png;base64,{{ encoded_image }}" download="secure_message.png"
+                        class="btn btn-glow btn-lg">
+                        <i class="fas fa-download me-2"></i>Download Image
+                    </a>
                 </div>
-                <img src="data:image/png;base64,{{ encoded_image }}" class="img-fluid mb-3 border rounded"
-                    alt="Encoded Image" style="max-height: 400px;">
-                <br>
-                <a href="data:image/png;base64,{{ encoded_image }}" download="secure_morse_image.png"
-                    class="btn btn-success btn-lg">
-                    <i class="bi bi-download"></i> Download Image
-                </a>
                 {% elif decrypted_message %}
-                <div class="alert alert-success" role="alert">
-                    <h4 class="alert-heading">Message Revealed!</h4>
-                    <p>The hidden message has been successfully decrypted.</p>
-                </div>
-                <div class="card bg-light mb-3">
-                    <div class="card-header">Decrypted Message</div>
-                    <div class="card-body">
-                        <p class="card-text fs-5">{{ decrypted_message }}</p>
+                <div class="mb-4">
+                    <i class="fas fa-envelope-open-text fa-4x text-info mb-3"></i>
+                    <h4 class="card-title text-info">Decryption Successful!</h4>
+                    <p class="card-text text-muted mb-2">The hidden message is:</p>
+
+                    <div class="p-3 rounded mb-4"
+                        style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);">
+                        <p class="mb-0 lead font-monospace text-warning">{{ decrypted_message }}</p>
                     </div>
                 </div>
                 {% endif %}
 
-                <hr>
-                <a href="{% url 'home' %}" class="btn btn-primary">
-                    <i class="bi bi-arrow-left"></i> Go Back to Home
+                <a href="{% url 'home' %}" class="btn btn-outline-light mt-3">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Home
                 </a>
             </div>
         </div>

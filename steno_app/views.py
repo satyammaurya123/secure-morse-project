@@ -36,10 +36,12 @@ def encode_view(request):
                 message = form.cleaned_data['message']
                 key = form.cleaned_data['secret_key']
                 image_file = form.cleaned_data['image']
+                method = form.cleaned_data['method']
+                compress = form.cleaned_data.get('compress', False)
 
                 # 1. Encrypt Message
                 # encrypt_message returns hex string of IV + Encrypted Data
-                encrypted_hex = encrypt_message(message, key)
+                encrypted_hex = encrypt_message(message, key, compress=compress)
                 
                 # 2. Convert Hex String to Morse Code
                 morse_msg = text_to_morse(encrypted_hex)

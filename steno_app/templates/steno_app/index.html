@@ -3,75 +3,91 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <h2 class="text-center mb-4">Secure Morse Steganography</h2>
+        <h2 class="text-center mb-4 app-title"
+            style="font-family: 'Orbitron', sans-serif; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,210,255,0.7);">
+            <i class="fas fa-shield-alt me-2"></i>Secure Morse Steganography
+        </h2>
 
         {% if error %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Error!</strong> {{ error }}
+        <div class="alert alert-danger alert-dismissible fade show shadow-lg" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i><strong>Error!</strong> {{ error }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endif %}
 
         {% if success_message %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <strong>Success!</strong> {{ success_message }}
+        <div class="alert alert-success alert-dismissible fade show shadow-lg" role="alert">
+            <i class="fas fa-check-circle me-2"></i><strong>Success!</strong> {{ success_message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endif %}
 
-        <div class="card">
+        <div class="glass-card">
             <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                <ul class="nav nav-pills card-header-pills justify-content-center" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="encode-tab" data-bs-toggle="tab" data-bs-target="#encode"
-                            type="button" role="tab" aria-controls="encode" aria-selected="true">Encode Message</button>
+                            type="button" role="tab" aria-controls="encode" aria-selected="true">
+                            <i class="fas fa-lock me-2"></i>Encode
+                        </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="decode-tab" data-bs-toggle="tab" data-bs-target="#decode"
-                            type="button" role="tab" aria-controls="decode" aria-selected="false">Decode
-                            Message</button>
+                            type="button" role="tab" aria-controls="decode" aria-selected="false">
+                            <i class="fas fa-unlock me-2"></i>Decode
+                        </button>
                     </li>
                 </ul>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 {% if user.is_authenticated %}
                 <div class="tab-content" id="myTabContent">
 
                     <!-- Encode Form -->
                     <div class="tab-pane fade show active" id="encode" role="tabpanel" aria-labelledby="encode-tab">
-                        <h5 class="card-title">Hide a Secret Message</h5>
-                        <p class="card-text text-muted">Enter your message, a secret key, and upload an image. The
-                            message will be encrypted, converted to Morse code, and hidden inside the image.</p>
+                        <h5 class="card-title text-center mb-4"><i class="fas fa-file-export me-2"></i>Hide a Secret
+                            Message</h5>
+                        <p class="text-center mb-4" style="color: rgba(255,255,255,0.8);">Enter your message, a secret
+                            key, and upload an image. The message will be encrypted, converted to Morse code, and hidden
+                            inside the image.</p>
                         <form method="post" action="{% url 'encode' %}" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="mb-3">
                                 {{ encode_form.as_p }}
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Encrypt & Encode</button>
+                            <button type="submit" class="btn btn-glow w-100 py-2 fw-bold">
+                                <i class="fas fa-cogs me-2"></i>Encrypt & Encode
+                            </button>
                         </form>
                     </div>
 
                     <!-- Decode Form -->
                     <div class="tab-pane fade" id="decode" role="tabpanel" aria-labelledby="decode-tab">
-                        <h5 class="card-title">Reveal a Secret Message</h5>
-                        <p class="card-text text-muted">Upload the steganographic image and provide the correct secret
-                            key to reveal the hidden message.</p>
+                        <h5 class="card-title text-center mb-4"><i class="fas fa-file-import me-2"></i>Reveal a Secret
+                            Message</h5>
+                        <p class="text-center mb-4" style="color: rgba(255,255,255,0.8);">Upload the steganographic
+                            image and provide the correct secret key to reveal the hidden message.</p>
                         <form method="post" action="{% url 'decode' %}" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="mb-3">
                                 {{ decode_form.as_p }}
                             </div>
-                            <button type="submit" class="btn btn-success w-100">Decode & Decrypt</button>
+                            <button type="submit" class="btn btn-glow-success w-100 py-2 fw-bold">
+                                <i class="fas fa-eye me-2"></i>Decode & Decrypt
+                            </button>
                         </form>
                     </div>
                 </div>
                 {% else %}
-                <div class="text-center py-4">
-                    <h3>Secure Morse Code Steganography</h3>
-                    <p class="lead">Please login or create an account to use the encoding and decoding tools.</p>
-                    <div class="mt-4">
-                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-2">Login</a>
-                        <a href="{% url 'signup' %}" class="btn btn-success btn-lg">Sign Up</a>
+                <div class="text-center py-5">
+                    <i class="fas fa-user-lock fa-4x mb-3 text-primary"></i>
+                    <h3>Authentication Required</h3>
+                    <p class="lead mb-4">Please login or create an account to access the secure steganography tools.</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'login' %}" class="btn btn-glow px-4 py-2"><i
+                                class="fas fa-sign-in-alt me-2"></i>Login</a>
+                        <a href="{% url 'signup' %}" class="btn btn-glow-success px-4 py-2"><i
+                                class="fas fa-user-plus me-2"></i>Sign Up</a>
                     </div>
                 </div>
                 {% endif %}

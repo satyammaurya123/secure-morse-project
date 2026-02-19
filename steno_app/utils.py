@@ -4,6 +4,7 @@ from Crypto.Util.Padding import pad, unpad
 from Crypto.Random import get_random_bytes
 from PIL import Image
 import binascii
+import zlib  # Added for compression
 
 # Morse Code Dictionary
 MORSE_CODE_DICT = {
@@ -21,15 +22,14 @@ MORSE_CODE_DICT = {
 
 REVERSE_MORSE_DICT = {v: k for k, v in MORSE_CODE_DICT.items()}
 
-def encrypt_message(plaintext, key):
+def encrypt_message(plaintext, key, compress=False):
     """
     Encrypts plaintext using AES-256 CBC mode.
-    Returns value as a hex string prefixed with the IV.
+    Optionally compresses data with zlib before encryption.
+    Returns value as a hex string prefixed with the IV and Compression Flag.
+    Format: IV (16 bytes) + Flag (1 byte) + Encrypted Data
     """
     # Ensure key is 32 bytes (256 bits)
-    # Pad with spaces or truncate if needed, but ideally user provides good key.
-    # For simplicity, we'll hash the key to get 32 bytes or just pad.
-    # Let's use SHA-256 on the key to get a consistent 32-byte key
     from Crypto.Hash import SHA256
     h = SHA256.new()
     h.update(key.encode('utf-8'))
@@ -37,18 +37,34 @@ def encrypt_message(plaintext, key):
     
     iv = get_random_bytes(16)
     cipher = AES.new(key_bytes, AES.MODE_CBC, iv)
-    encrypted_bytes = cipher.encrypt(pad(plaintext.encode('utf-8'), AES.block_size))
-    # Combine IV and encrypted data, then convert to hex
-    return binascii.hexlify(iv + encrypted_bytes).decode('utf-8').upper()
+    
+    data_to_encrypt = plaintext.encode('utf-8')
+    compression_flag = b'\x00' # Default: No compression
+    
+    if compress:
+        data_to_encrypt = zlib.compress(data_to_encrypt)
+        compression_flag = b'\x01'
+        
+    encrypted_bytes = cipher.encrypt(pad(data_to_encrypt, AES.block_size))
+    
+    # Combine IV, Flag, and encrypted data, then convert to hex
+    return binascii.hexlify(iv + compression_flag + encrypted_bytes).decode('utf-8').upper()
 
 def decrypt_message(ciphertext_hex, key):
     """
-    Decrypts a hex string (IV + ciphertext) using AES-256 CBC mode.
+    Decrypts a hex string (IV + Flag + ciphertext) using AES-256 CBC mode.
+    Handles decompression if flag is set.
     """
     try:
         data_bytes = binascii.unhexlify(ciphertext_hex)
+        
+        # Check minimum length (IV + Flag + 1 block)
+        if len(data_bytes) < 17:
+             raise ValueError("Ciphertext too short")
+
         iv = data_bytes[:16]
-        encrypted_bytes = data_bytes[16:]
+        compression_flag = data_bytes[16:17]
+        encrypted_bytes = data_bytes[17:]
         
         from Crypto.Hash import SHA256
         h = SHA256.new()
@@ -56,9 +72,16 @@ def decrypt_message(ciphertext_hex, key):
         key_bytes = h.digest()
         
         cipher = AES.new(key_bytes, AES.MODE_CBC, iv)
-        decrypted_bytes = unpad(cipher.decrypt(encrypted_bytes), AES.block_size)
-        return decrypted_bytes.decode('utf-8')
-    except (ValueError, KeyError, binascii.Error) as e:
+        decrypted_data = unpad(cipher.decrypt(encrypted_bytes), AES.block_size)
+        
+        if compression_flag == b'\x01':
+            try:
+                decrypted_data = zlib.decompress(decrypted_data)
+            except zlib.error:
+                return "Decompression Failed: Data corrupted"
+
+        return decrypted_data.decode('utf-8')
+    except (ValueError, KeyError, binascii.Error, UnicodeDecodeError) as e:
         return f"Decryption Failed: {str(e)}"
 
 def text_to_morse(text):

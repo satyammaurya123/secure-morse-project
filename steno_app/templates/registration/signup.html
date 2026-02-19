@@ -3,19 +3,20 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-5">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white">
-                <h3 class="text-center mb-0">Sign Up</h3>
+        <div class="glass-card shadow-lg">
+            <div class="card-header text-center py-3">
+                <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Sign Up</h4>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form method="post">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button type="submit" class="btn btn-success w-100">Sign Up</button>
+                    <button type="submit" class="btn btn-glow-success w-100 mt-3 fw-bold">Create Account</button>
                 </form>
-                <div class="mt-3 text-center">
-                    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
-                </div>
+            </div>
+            <div class="card-footer text-center py-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                <small>Already have an account? <a href="{% url 'login' %}" class="text-info fw-bold">Login
+                        Here</a></small>
             </div>
         </div>
     </div>

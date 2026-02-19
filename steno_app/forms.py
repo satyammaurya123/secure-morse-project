@@ -25,6 +25,18 @@ class DecodeForm(forms.Form):
         widget=forms.ClearableFileInput(attrs={'class': 'form-control'}),
         required=True
     )
+    method = forms.ChoiceField(
+        label="Steganography Method",
+        choices=[('LSB', 'LSB (Least Significant Bit)'), ('DCT', 'DCT (Discrete Cosine Transform)')],
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        initial='LSB'
+    )
+    compress = forms.BooleanField(
+        label="Compress Message (Zlib)",
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
     secret_key = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Enter the secret key to decrypt'}),
         label="Decryption Key",
