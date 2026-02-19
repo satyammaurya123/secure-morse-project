@@ -1,0 +1,82 @@
+{% extends 'steno_app/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="text-center mb-4">Secure Morse Steganography</h2>
+
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        {% if success_message %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Success!</strong> {{ success_message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="encode-tab" data-bs-toggle="tab" data-bs-target="#encode"
+                            type="button" role="tab" aria-controls="encode" aria-selected="true">Encode Message</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="decode-tab" data-bs-toggle="tab" data-bs-target="#decode"
+                            type="button" role="tab" aria-controls="decode" aria-selected="false">Decode
+                            Message</button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                <div class="tab-content" id="myTabContent">
+
+                    <!-- Encode Form -->
+                    <div class="tab-pane fade show active" id="encode" role="tabpanel" aria-labelledby="encode-tab">
+                        <h5 class="card-title">Hide a Secret Message</h5>
+                        <p class="card-text text-muted">Enter your message, a secret key, and upload an image. The
+                            message will be encrypted, converted to Morse code, and hidden inside the image.</p>
+                        <form method="post" action="{% url 'encode' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ encode_form.as_p }}
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Encrypt & Encode</button>
+                        </form>
+                    </div>
+
+                    <!-- Decode Form -->
+                    <div class="tab-pane fade" id="decode" role="tabpanel" aria-labelledby="decode-tab">
+                        <h5 class="card-title">Reveal a Secret Message</h5>
+                        <p class="card-text text-muted">Upload the steganographic image and provide the correct secret
+                            key to reveal the hidden message.</p>
+                        <form method="post" action="{% url 'decode' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ decode_form.as_p }}
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Decode & Decrypt</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <h3>Secure Morse Code Steganography</h3>
+                    <p class="lead">Please login or create an account to use the encoding and decoding tools.</p>
+                    <div class="mt-4">
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-2">Login</a>
+                        <a href="{% url 'signup' %}" class="btn btn-success btn-lg">Sign Up</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
