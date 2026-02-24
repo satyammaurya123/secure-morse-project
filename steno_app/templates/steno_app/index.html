@@ -1,98 +1,193 @@
 {% extends 'steno_app/base.html' %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <h2 class="text-center mb-4 app-title"
-            style="font-family: 'Orbitron', sans-serif; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,210,255,0.7);">
-            <i class="fas fa-shield-alt me-2"></i>Secure Morse Steganography
-        </h2>
+<div class="flex flex-col items-center w-full">
 
-        {% if error %}
-        <div class="alert alert-danger alert-dismissible fade show shadow-lg" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i><strong>Error!</strong> {{ error }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <!-- Dashboard Header -->
+    <div
+        class="w-full max-w-4xl mb-12 text-center md:text-left md:flex md:items-end md:justify-between border-b border-white/5 pb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white tracking-tight mb-2">Dashboard</h1>
+            <p class="text-gray-500 text-sm">Manage your secure transmissions.</p>
         </div>
-        {% endif %}
 
-        {% if success_message %}
-        <div class="alert alert-success alert-dismissible fade show shadow-lg" role="alert">
-            <i class="fas fa-check-circle me-2"></i><strong>Success!</strong> {{ success_message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
-
-        <div class="glass-card">
-            <div class="card-header">
-                <ul class="nav nav-pills card-header-pills justify-content-center" id="myTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="encode-tab" data-bs-toggle="tab" data-bs-target="#encode"
-                            type="button" role="tab" aria-controls="encode" aria-selected="true">
-                            <i class="fas fa-lock me-2"></i>Encode
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="decode-tab" data-bs-toggle="tab" data-bs-target="#decode"
-                            type="button" role="tab" aria-controls="decode" aria-selected="false">
-                            <i class="fas fa-unlock me-2"></i>Decode
-                        </button>
-                    </li>
-                </ul>
+        <!-- Stats Cards -->
+        <div class="flex gap-4 mt-6 md:mt-0">
+            <div class="glass-panel px-4 py-3 rounded-xl flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <div class="text-xs">
+                    <span class="block text-gray-500">System Status</span>
+                    <span class="block text-white font-medium">Operational</span>
+                </div>
             </div>
-            <div class="card-body p-4">
-                {% if user.is_authenticated %}
-                <div class="tab-content" id="myTabContent">
-
-                    <!-- Encode Form -->
-                    <div class="tab-pane fade show active" id="encode" role="tabpanel" aria-labelledby="encode-tab">
-                        <h5 class="card-title text-center mb-4"><i class="fas fa-file-export me-2"></i>Hide a Secret
-                            Message</h5>
-                        <p class="text-center mb-4" style="color: rgba(255,255,255,0.8);">Enter your message, a secret
-                            key, and upload an image. The message will be encrypted, converted to Morse code, and hidden
-                            inside the image.</p>
-                        <form method="post" action="{% url 'encode' %}" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                {{ encode_form.as_p }}
-                            </div>
-                            <button type="submit" class="btn btn-glow w-100 py-2 fw-bold">
-                                <i class="fas fa-cogs me-2"></i>Encrypt & Encode
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Decode Form -->
-                    <div class="tab-pane fade" id="decode" role="tabpanel" aria-labelledby="decode-tab">
-                        <h5 class="card-title text-center mb-4"><i class="fas fa-file-import me-2"></i>Reveal a Secret
-                            Message</h5>
-                        <p class="text-center mb-4" style="color: rgba(255,255,255,0.8);">Upload the steganographic
-                            image and provide the correct secret key to reveal the hidden message.</p>
-                        <form method="post" action="{% url 'decode' %}" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                {{ decode_form.as_p }}
-                            </div>
-                            <button type="submit" class="btn btn-glow-success w-100 py-2 fw-bold">
-                                <i class="fas fa-eye me-2"></i>Decode & Decrypt
-                            </button>
-                        </form>
-                    </div>
+            <div class="glass-panel px-4 py-3 rounded-xl flex items-center gap-3">
+                <i class="fas fa-layer-group text-blue-500 text-xs"></i>
+                <div class="text-xs">
+                    <span class="block text-gray-500">Encryption Level</span>
+                    <span class="block text-white font-medium">AES-256</span>
                 </div>
-                {% else %}
-                <div class="text-center py-5">
-                    <i class="fas fa-user-lock fa-4x mb-3 text-primary"></i>
-                    <h3>Authentication Required</h3>
-                    <p class="lead mb-4">Please login or create an account to access the secure steganography tools.</p>
-                    <div class="d-flex justify-content-center gap-3">
-                        <a href="{% url 'login' %}" class="btn btn-glow px-4 py-2"><i
-                                class="fas fa-sign-in-alt me-2"></i>Login</a>
-                        <a href="{% url 'signup' %}" class="btn btn-glow-success px-4 py-2"><i
-                                class="fas fa-user-plus me-2"></i>Sign Up</a>
-                    </div>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
+
+    <!-- Main Workspace -->
+    <div class="w-full max-w-4xl glass-card rounded-2xl overflow-hidden relative z-10">
+
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-white/5 bg-white/5 p-1 gap-1">
+            <button id="tab-encode" onclick="switchTab('encode')"
+                class="flex-1 py-2 rounded-lg text-center text-xs font-semibold transition-all duration-200 text-white bg-white/10 shadow-sm border border-white/5">
+                New Transmission (Encode)
+            </button>
+            <button id="tab-decode" onclick="switchTab('decode')"
+                class="flex-1 py-2 rounded-lg text-center text-xs font-semibold transition-all duration-200 text-gray-500 hover:text-gray-300 hover:bg-white/5">
+                Decrypt Incoming (Decode)
+            </button>
+        </div>
+
+        <div class="p-8">
+            {% if error %}
+            <div class="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3 text-red-400">
+                <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                <div class="flex-1">
+                    <h3 class="font-semibold text-sm">Action Failed</h3>
+                    <p class="text-xs mt-1 break-words">{{ error }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Encode Form -->
+            <div id="encode-section" class="space-y-8 animate-fade-in">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        <i class="fas fa-fingerprint text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">Secure Encode</h2>
+                        <p class="text-gray-500 text-xs mt-1 max-w-md">Encrypt message with AES-256 and hide within
+                            image carrier using LSB/DCT steganography.</p>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" action="{% url 'encode' %}" class="space-y-6">
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Secret
+                                Message</label>
+                            {{ encode_form.message }}
+                        </div>
+
+                        <div>
+                            <label
+                                class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Encryption
+                                Key</label>
+                            {{ encode_form.secret_key }}
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Carrier
+                                Image</label>
+                            {{ encode_form.image }}
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+                        <div class="flex items-center gap-6">
+                            <div>
+                                <label
+                                    class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Method</label>
+                                {{ encode_form.method }}
+                            </div>
+                            <div class="flex items-center gap-2 mt-6">
+                                {{ encode_form.compress }}
+                                <label for="{{ encode_form.compress.id_for_label }}"
+                                    class="text-xs text-gray-400 cursor-pointer select-none">
+                                    Compress Data
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" name="encode"
+                            class="py-2.5 px-6 rounded-lg bg-white text-black text-sm font-semibold hover:bg-gray-200 transition shadow-[0_0_20px_rgba(255,255,255,0.15)] mt-6">
+                            Initialize Encode
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Decode Form -->
+            <div id="decode-section" class="hidden space-y-8 animate-fade-in">
+                <div class="flex items-start gap-4">
+                    <div class="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                        <i class="fas fa-unlock-keyhole text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">Decrypt Payload</h2>
+                        <p class="text-gray-500 text-xs mt-1 max-w-md">Extract and decrypt hidden messages from carrier
+                            images.</p>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" action="{% url 'decode' %}" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Carrier
+                                Image</label>
+                            {{ decode_form.image }}
+                        </div>
+
+                        <div>
+                            <label
+                                class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Decryption
+                                Key</label>
+                            {{ decode_form.secret_key }}
+                        </div>
+
+                        <div>
+                            <label
+                                class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Method</label>
+                            {{ decode_form.method }}
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/5 flex justify-end">
+                        <button type="submit" name="decode"
+                            class="py-2.5 px-6 rounded-lg bg-white text-black text-sm font-semibold hover:bg-gray-200 transition shadow-[0_0_20px_rgba(255,255,255,0.15)]">
+                            Run Decryption
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
 </div>
+
+<script>
+    function switchTab(tab) {
+        const encodeSection = document.getElementById('encode-section');
+        const decodeSection = document.getElementById('decode-section');
+        const tabEncode = document.getElementById('tab-encode');
+        const tabDecode = document.getElementById('tab-decode');
+
+        if (tab === 'encode') {
+            encodeSection.classList.remove('hidden');
+            decodeSection.classList.add('hidden');
+
+            // Active
+            tabEncode.className = "flex-1 py-2 rounded-lg text-center text-xs font-semibold transition-all duration-200 text-white bg-white/10 shadow-sm border border-white/5";
+            tabDecode.className = "flex-1 py-2 rounded-lg text-center text-xs font-semibold transition-all duration-200 text-gray-500 hover:text-gray-300 hover:bg-white/5";
+        } else {
+            encodeSection.classList.add('hidden');
+            decodeSection.classList.remove('hidden');
+
+            // Active
+            tabDecode.className = "flex-1 py-2 rounded-lg text-center text-xs font-semibold transition-all duration-200 text-white bg-white/10 shadow-sm border border-white/5";
+            tabEncode.className = "flex-1 py-2 rounded-lg text-center text-xs font-semibold transition-all duration-200 text-gray-500 hover:text-gray-300 hover:bg-white/5";
+        }
+    }
+</script>
 {% endblock %}

@@ -1,174 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-    --primary-color: #00d2ff;
-    --secondary-color: #3a7bd5;
-    --accent-color: #00ff87;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --text-light: #ffffff;
-    --text-dark: #333333;
+    --bg-color: #030303;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --primary-glow: conic-gradient(from 180deg at 50% 50%, #16abff33 0deg, #0885ff33 55deg, #54d6ff33 120deg, #0071ff33 160deg, transparent 360deg);
 }
 
 body {
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-    font-family: 'Roboto', sans-serif;
-    color: var(--text-light);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+    background-color: var(--bg-color);
+    font-family: 'Inter', sans-serif;
+    color: #e5e7eb;
+    overflow-x: hidden;
 }
 
-/* Cyber Grid Overlay */
-body::before {
-    content: "";
-    position: absolute;
+/* Dynamic Mesh Gradient Background */
+.mesh-gradient {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background:
-        linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
-    background-size: 30px 30px;
+    background: radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.08), transparent 25%);
+    z-index: -1;
     pointer-events: none;
-    z-index: 0;
 }
 
-@keyframes gradientBG {
+.mesh-gradient::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    background: var(--primary-glow);
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: rotate 15s linear infinite;
+    z-index: -1;
+}
+
+@keyframes rotate {
     0% {
-        background-position: 0% 50%;
+        transform: translate(-50%, -50%) rotate(0deg) scale(1.5);
     }
 
     50% {
-        background-position: 100% 50%;
+        transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
     }
 
     100% {
-        background-position: 0% 50%;
+        transform: translate(-50%, -50%) rotate(360deg) scale(1.5);
     }
 }
 
-/* Navbar Glassmorphism */
-.navbar {
-    background: rgba(15, 32, 39, 0.9);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--glass-border);
-    transition: all 0.3s ease;
-    z-index: 1000;
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
 }
 
-.navbar-brand {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    color: var(--primary-color) !important;
-    text-shadow: 0 0 10px rgba(0, 210, 255, 0.7);
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-.nav-link {
-    color: var(--text-light) !important;
-    transition: color 0.3s;
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
 }
 
-.nav-link:hover {
-    color: var(--accent-color) !important;
-    text-shadow: 0 0 8px rgba(0, 255, 135, 0.6);
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
-/* Glassmorphic Card */
+/* Glassmorphism Utilities */
+.glass-panel {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+}
+
 .glass-card {
-    background: rgba(15, 32, 39, 0.75);
-    /* Darker background for better contrast */
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    color: #ffffff;
-    /* Pure white text */
-    overflow: hidden;
-    position: relative;
-    z-index: 1;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, border-color 0.3s ease;
 }
 
-.card-header {
-    background: rgba(0, 0, 0, 0.4);
-    border-bottom: 1px solid var(--glass-border);
-    font-family: 'Orbitron', sans-serif;
-}
-
-/* Buttons */
-.btn-glow {
-    background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
-    border: none;
-    color: white;
-    box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
-    transition: all 0.3s ease;
-}
-
-.btn-glow:hover {
-    box-shadow: 0 0 20px rgba(0, 210, 255, 0.8);
+.glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
     transform: translateY(-2px);
 }
 
-.btn-glow-success {
-    background: linear-gradient(45deg, #11998e, #38ef7d);
-    border: none;
-    color: white;
-    box-shadow: 0 0 10px rgba(56, 239, 125, 0.5);
+/* Typography Polish */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    letter-spacing: -0.025em;
 }
 
-.btn-glow-success:hover {
-    box-shadow: 0 0 20px rgba(56, 239, 125, 0.8);
-}
-
-/* Form Controls */
-.form-control,
-.form-select {
-    background: rgba(255, 255, 255, 0.05);
-    /* Very slight tint */
-    border: 1px solid var(--glass-border);
-    color: var(--text-light);
-    /* White text input */
-    backdrop-filter: blur(5px);
-}
-
-.form-control:focus,
-.form-select:focus {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--text-light);
-    border-color: var(--primary-color);
-    box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
-}
-
-.form-control::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-    /* Lighter placeholder */
-}
-
-/* Footer */
-footer {
-    background: rgba(15, 32, 39, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid var(--glass-border);
-    color: var(--text-light);
-    padding: 20px 0;
-    margin-top: auto;
-    z-index: 1000;
-}
-
-/* Alerts */
-.alert-success {
-    background: rgba(56, 239, 125, 0.2);
-    border-color: #38ef7d;
-    color: #fff;
-    backdrop-filter: blur(5px);
-}
-
-.alert-danger {
-    background: rgba(255, 99, 71, 0.2);
-    border-color: #ff6347;
-    color: #fff;
-    backdrop-filter: blur(5px);
+/* Autofill Fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #0a0a0a inset !important;
+    -webkit-text-fill-color: white !important;
+    caret-color: white;
+    transition: background-color 5000s ease-in-out 0s;
 }

@@ -1,23 +1,90 @@
 {% extends 'steno_app/base.html' %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="glass-card shadow-lg">
-            <div class="card-header text-center py-3">
-                <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Sign Up</h4>
+<div class="flex items-center justify-center min-h-[60vh]">
+    <div class="w-full max-w-md glass-card rounded-2xl p-8 shadow-2xl relative">
+
+        <div class="text-center mb-8">
+            <div
+                class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-cyan-500/10 text-cyan-400 mb-4 shadow-inner ring-1 ring-cyan-500/20">
+                <i class="fas fa-user-shield text-xl"></i>
             </div>
-            <div class="card-body p-4">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-glow-success w-100 mt-3 fw-bold">Create Account</button>
-                </form>
+            <h2 class="text-2xl font-bold text-white tracking-tight">Create Account</h2>
+            <p class="text-gray-500 text-sm mt-2">Join to start using military-grade steganography.</p>
+        </div>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                {% for field in form %}
+                {% for error in field.errors %}
+                <p class="flex items-center gap-2 mb-1"><i class="fas fa-times-circle"></i> {{ error }}</p>
+                {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <p class="flex items-center gap-2"><i class="fas fa-times-circle"></i> {{ error }}</p>
+                {% endfor %}
             </div>
-            <div class="card-footer text-center py-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
-                <small>Already have an account? <a href="{% url 'login' %}" class="text-info fw-bold">Login
-                        Here</a></small>
+            {% endif %}
+
+            <div class="space-y-4">
+                {% for field in form %}
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">{{ field.label
+                        }}</label>
+                    <div class="relative">
+                        <style>
+                            /* Scoped style for this form's inputs */
+                            form input[type="text"],
+                            form input[type="password"],
+                            form input[type="email"] {
+                                width: 100%;
+                                padding: 0.5rem 0.75rem;
+                                background-color: rgba(0, 0, 0, 0.2);
+                                border: 1px solid rgba(255, 255, 255, 0.1);
+                                border-radius: 0.5rem;
+                                color: #e5e7eb;
+                                font-size: 0.875rem;
+                                outline: none;
+                                transition: all 0.2s;
+                            }
+
+                            form input:focus {
+                                border-color: #3b82f6;
+                                box-shadow: 0 0 0 1px #3b82f6;
+                            }
+
+                            form input:hover {
+                                border-color: rgba(255, 255, 255, 0.2);
+                            }
+
+                            .helptext {
+                                display: none;
+                            }
+                        </style>
+                        {{ field }}
+                    </div>
+                    {% if field.help_text %}
+                    <p class="mt-1 text-xs text-gray-600">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
+
+            <button type="submit"
+                class="w-full py-2.5 px-6 rounded-lg bg-white text-black text-sm font-semibold hover:bg-gray-200 transition shadow-[0_0_20px_rgba(255,255,255,0.1)] mt-2">
+                Create Account
+            </button>
+        </form>
+
+        <div class="mt-8 text-center border-t border-white/5 pt-6">
+            <p class="text-gray-500 text-xs">
+                Already have an account?
+                <a href="{% url 'login' %}" class="text-white hover:text-gray-300 font-medium transition ml-1">Login
+                    here</a>
+            </p>
         </div>
     </div>
 </div>
