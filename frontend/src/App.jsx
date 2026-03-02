@@ -6,6 +6,7 @@ import { checkAuthStatus, logout } from './api';
 import Encode from './Encode';
 import Decode from './Decode';
 import Login from './Login';
+import AudioStego from './components/AudioStego';
 import './index.css';
 
 function Navbar({ user, setUser }) {
@@ -32,8 +33,9 @@ function Navbar({ user, setUser }) {
       <div className="nav-links">
         {user ? (
           <>
-            <Link to="/encode" className="nav-link">Encode</Link>
-            <Link to="/decode" className="nav-link">Decode</Link>
+            <Link to="/encode" className="nav-link">Text Encode</Link>
+            <Link to="/decode" className="nav-link">Text Decode</Link>
+            <Link to="/audio-stego" className="nav-link">Audio</Link>
             <span className="nav-link" style={{ color: 'var(--primary)' }}>{user.username}</span>
             <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '0.5rem 1rem' }}>Logout</button>
           </>
@@ -53,12 +55,15 @@ function Home() {
         Hide your sensitive communications inside ordinary images using AES-256-GCM, RSA-2048, and Zero-Knowledge principles.
       </p>
 
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem', flexWrap: 'wrap' }}>
         <Link to="/encode" className="btn btn-primary">
-          <Lock size={18} /> Encode Secret
+          <Lock size={18} /> Hide Text
         </Link>
         <Link to="/decode" className="btn btn-secondary">
-          <Unlock size={18} /> Decode Image
+          <Unlock size={18} /> Extract Text
+        </Link>
+        <Link to="/audio-stego" className="btn btn-primary" style={{ backgroundColor: 'var(--gray-800)', borderColor: 'var(--gray-700)' }}>
+          <Lock size={18} /> Audio Stego
         </Link>
       </div>
 
@@ -111,6 +116,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/encode" element={user ? <Encode /> : <Login setUser={setUser} />} />
             <Route path="/decode" element={user ? <Decode /> : <Login setUser={setUser} />} />
+            <Route path="/audio-stego" element={user ? <AudioStego /> : <Login setUser={setUser} />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
           </Routes>
         </main>

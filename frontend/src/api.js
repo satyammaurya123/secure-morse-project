@@ -54,4 +54,8 @@ export const encodeImage = (formData) => api.post('/api/encode/', formData);
 
 export const decodeImage = (formData) => api.post('/api/decode/', formData);
 
+export const registerAudioStego = (data) => api.post('/api/audio-stego/register/', data);
+
+export const verifyAudioStego = (formData) => api.post('/api/audio-stego/verify/', formData);
+
 export default api;

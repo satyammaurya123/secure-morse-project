@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import AuthStatusView, SignupView, LoginView, LogoutView, EncodeView, DecodeView, api_root
+from .views.api import register_audio_stego, verify_audio_stego
 
 urlpatterns = [
     path('', api_root, name='api-root'),
@@ -11,4 +12,6 @@ urlpatterns = [
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/encode/', EncodeView.as_view(), name='api-encode'),
     path('api/decode/', DecodeView.as_view(), name='api-decode'),
+    path('api/audio-stego/register/', register_audio_stego, name='api-audio-stego-register'),
+    path('api/audio-stego/verify/', verify_audio_stego, name='api-audio-stego-verify'),
 ]
