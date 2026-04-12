@@ -185,10 +185,15 @@ LOGOUT_REDIRECT_URL = 'home' # or 'login'
 # CORS Settings for React Frontend
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://secure-morse-project.vercel.app",
     "https://secure-morse-project-qby2y1ynk-satyam18.vercel.app",
 ]
+
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173", 
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://secure-morse-project.vercel.app",
     "https://secure-morse-project-qby2y1ynk-satyam18.vercel.app",
 ]
 
