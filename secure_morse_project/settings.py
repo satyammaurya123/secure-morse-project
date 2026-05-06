@@ -139,7 +139,9 @@ SIMPLE_JWT = {
 # }
 
 DATABASES = {
-    'default': dj_database_url.parse("postgresql://neondb_owner:npg_Kxrd4G6pECga@ep-dawn-rice-a1ha7rdx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require")
+    'default': dj_database_url.parse("postgresql://neondb_owner:npg_Kxrd4G6pECga@ep-dawn-rice-a1ha7rdx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"),
+    
+    'CONN_MAX_AGE': 60
 }
 
 # Password validation
