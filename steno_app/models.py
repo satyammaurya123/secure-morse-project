@@ -18,3 +18,17 @@ class AudioStegoLog(models.Model):
 
     def __str__(self):
         return f"AudioStegoLog {self.image_hash[:8]} by {self.uploader.username}"
+
+import random
+import string
+
+def generate_otp():
+    return ''.join(random.choices(string.digits, k=6))
+
+class EmailVerificationToken(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='email_verification_token')
+    otp = models.CharField(max_length=6, default=generate_otp)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"OTP for {self.user.username}"

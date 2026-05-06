@@ -6,6 +6,7 @@ import { checkAuthStatus, logout } from './api';
 import Encode from './Encode';
 import Decode from './Decode';
 import Login from './Login';
+import Signup from './Signup';
 import AudioStego from './components/AudioStego';
 import './index.css';
 
@@ -118,6 +119,7 @@ function App() {
             <Route path="/decode" element={user ? <Decode /> : <Login setUser={setUser} />} />
             <Route path="/audio-stego" element={user ? <AudioStego /> : <Login setUser={setUser} />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
+            <Route path="/signup" element={<Signup setUser={setUser} />} />
           </Routes>
         </main>
       </div>

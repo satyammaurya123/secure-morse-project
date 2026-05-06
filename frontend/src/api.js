@@ -47,7 +47,9 @@ api.interceptors.response.use(
 
 export const checkAuthStatus = () => api.get('/auth/status/');
 export const login = (credentials) => api.post('/auth/login/', credentials);
+export const googleLogin = (data) => api.post('/auth/google/', data);
 export const signup = (userData) => api.post('/auth/signup/', userData);
+export const verifyEmail = (data) => api.post('/auth/verify-email/', data);
 export const logout = () => api.post('/auth/logout/');
 
 export const encodeImage = (formData) => api.post('/api/encode/', formData);
