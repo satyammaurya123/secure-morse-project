@@ -7,6 +7,8 @@ import Encode from './Encode';
 import Decode from './Decode';
 import Login from './Login';
 import Signup from './Signup';
+import Profile from './Profile';
+import ForgotPassword from './ForgotPassword';
 import AudioStego from './components/AudioStego';
 import './index.css';
 
@@ -37,7 +39,9 @@ function Navbar({ user, setUser }) {
             <Link to="/encode" className="nav-link">Text Encode</Link>
             <Link to="/decode" className="nav-link">Text Decode</Link>
             <Link to="/audio-stego" className="nav-link">Audio</Link>
-            <span className="nav-link" style={{ color: 'var(--primary)' }}>{user.username}</span>
+            <Link to="/profile" className="nav-link nav-link-user">
+              <span style={{ color: 'var(--primary)' }}>{user.username}</span>
+            </Link>
             <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '0.5rem 1rem' }}>Logout</button>
           </>
         ) : (
@@ -118,8 +122,10 @@ function App() {
             <Route path="/encode" element={user ? <Encode /> : <Login setUser={setUser} />} />
             <Route path="/decode" element={user ? <Decode /> : <Login setUser={setUser} />} />
             <Route path="/audio-stego" element={user ? <AudioStego /> : <Login setUser={setUser} />} />
+            <Route path="/profile" element={user ? <Profile user={user} setUser={setUser} /> : <Login setUser={setUser} />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/signup" element={<Signup setUser={setUser} />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
           </Routes>
         </main>
       </div>

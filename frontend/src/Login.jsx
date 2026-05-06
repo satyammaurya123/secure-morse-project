@@ -246,6 +246,11 @@ export default function Login({ setUser }) {
                                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                            <Link to="/forgot-password" style={{ fontSize: '0.85rem', color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>
+                                Forgot Password?
+                            </Link>
+                        </div>
                     </div>
 
                     {/* Submit */}

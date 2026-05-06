@@ -10,7 +10,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
 from ..serializers import SignupSerializer, LoginSerializer
-from ..models import EmailVerificationToken
+from ..models import EmailVerificationToken, PasswordResetToken
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -195,3 +195,94 @@ class GoogleLoginView(APIView):
         except ValueError as e:
             logger.warning(f"Invalid Google token provided: {e}")
             return Response({"error": "Invalid Google token"}, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        password = request.data.get('password')
+
+        # Google-OAuth users have no usable password — skip password check
+        if user.has_usable_password():
+            if not password:
+                return Response(
+                    {"error": "Password is required to delete your account."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if not user.check_password(password):
+                logger.warning(f"Delete account failed for '{user.username}': incorrect password")
+                return Response(
+                    {"error": "Incorrect password. Account deletion cancelled."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        username = user.username
+        user.delete()
+        logger.info(f"Account '{username}' permanently deleted.")
+        return Response(
+            {"message": "Your account has been permanently deleted."},
+            status=status.HTTP_200_OK
+        )
+
+class ForgotPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        user = User.objects.filter(email=email).first()
+        if not user:
+            # For security, we might want to return the same response whether the email exists or not,
+            # but to be helpful here we'll let the user know.
+            return Response({"error": "No user found with this email"}, status=status.HTTP_404_NOT_FOUND)
+            
+        if not user.has_usable_password():
+            return Response({"error": "This account uses Google Sign-In. Password reset is not available."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Delete existing token if any
+        PasswordResetToken.objects.filter(user=user).delete()
+        
+        token_obj = PasswordResetToken.objects.create(user=user)
+        
+        try:
+            send_mail(
+                subject='Password Reset Code - SecureMorse',
+                message=f'Your password reset code is: {token_obj.otp}\n\nPlease enter this code to reset your password.',
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+            logger.info(f"Password reset OTP sent to {email}")
+            return Response({"message": "Password reset code sent to your email."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Failed to send password reset email to {email}: {e}")
+            return Response({"error": "Failed to send email. Please try again later."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+        new_password = request.data.get('new_password')
+        
+        if not all([email, otp, new_password]):
+            return Response({"error": "Email, OTP, and new password are required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            token_obj = PasswordResetToken.objects.get(user__email=email, otp=otp)
+            user = token_obj.user
+            
+            user.set_password(new_password)
+            user.save()
+            
+            token_obj.delete()
+            
+            logger.info(f"Password reset successfully for user '{user.username}'")
+            return Response({"message": "Password has been reset successfully."}, status=status.HTTP_200_OK)
+            
+        except PasswordResetToken.DoesNotExist:
+            return Response({"error": "Invalid or expired reset code"}, status=status.HTTP_400_BAD_REQUEST)

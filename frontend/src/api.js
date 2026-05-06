@@ -51,7 +51,9 @@ export const googleLogin = (data) => api.post('/auth/google/', data);
 export const signup = (userData) => api.post('/auth/signup/', userData);
 export const verifyEmail = (data) => api.post('/auth/verify-email/', data);
 export const logout = () => api.post('/auth/logout/');
-
+export const deleteAccount = (data) => api.delete('/auth/delete-account/', { data });
+export const forgotPassword = (data) => api.post('/auth/forgot-password/', data);
+export const resetPassword = (data) => api.post('/auth/reset-password/', data);
 export const encodeImage = (formData) => api.post('/api/encode/', formData);
 
 export const decodeImage = (formData) => api.post('/api/decode/', formData);
