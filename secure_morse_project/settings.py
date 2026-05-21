@@ -140,9 +140,8 @@ SIMPLE_JWT = {
 
 DATABASES = {
     'default': dj_database_url.parse("postgresql://neondb_owner:npg_Kxrd4G6pECga@ep-dawn-rice-a1ha7rdx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"),
-    
-    'CONN_MAX_AGE': 60
 }
+DATABASES['default']['CONN_MAX_AGE'] = 60
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -233,10 +232,5 @@ LOGGING = {
     },
 }
 
-# Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+# Email Configuration (Google Apps Script HTTP Relay)
+GOOGLE_SCRIPT_URL = os.environ.get('GOOGLE_SCRIPT_URL')

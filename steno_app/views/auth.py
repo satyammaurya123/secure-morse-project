@@ -11,7 +11,7 @@ from google.auth.transport import requests as google_requests
 
 from ..serializers import SignupSerializer, LoginSerializer
 from ..models import EmailVerificationToken, PasswordResetToken
-from django.core.mail import send_mail
+import requests
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -48,16 +48,20 @@ class SignupView(APIView):
             token_obj = EmailVerificationToken.objects.create(user=user)
             
             try:
-                send_mail(
-                    subject='Your Verification Code - SecureMorse',
-                    message=f'Your verification code is: {token_obj.otp}\n\nPlease enter this code to verify your email address.',
-                    from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[user.email],
-                    fail_silently=False,
+                response = requests.post(
+                    settings.GOOGLE_SCRIPT_URL,
+                    json={
+                        "to": user.email,
+                        "subject": "Your Verification Code - SecureMorse",
+                        "message": f"Your verification code is: {token_obj.otp}\n\nPlease enter this code to verify your email address."
+                    },
+                    timeout=10
                 )
+                response.raise_for_status()
             except Exception as e:
                 logger.error(f"Failed to send email to {email}: {e}")
-                # We could delete the user or handle the error, but for now we proceed
+                user.delete()
+                return Response({"error": "Failed to send verification email. Please try again or contact support."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             logger.info(f"User '{username}' created successfully, pending email verification with OTP.")
             return Response({
@@ -248,13 +252,16 @@ class ForgotPasswordView(APIView):
         token_obj = PasswordResetToken.objects.create(user=user)
         
         try:
-            send_mail(
-                subject='Password Reset Code - SecureMorse',
-                message=f'Your password reset code is: {token_obj.otp}\n\nPlease enter this code to reset your password.',
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[user.email],
-                fail_silently=False,
+            response = requests.post(
+                settings.GOOGLE_SCRIPT_URL,
+                json={
+                    "to": user.email,
+                    "subject": "Password Reset Code - SecureMorse",
+                    "message": f"Your password reset code is: {token_obj.otp}\n\nPlease enter this code to reset your password."
+                },
+                timeout=10
             )
+            response.raise_for_status()
             logger.info(f"Password reset OTP sent to {email}")
             return Response({"message": "Password reset code sent to your email."}, status=status.HTTP_200_OK)
         except Exception as e:
