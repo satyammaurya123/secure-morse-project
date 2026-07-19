@@ -25,12 +25,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--s%m+if2lu@0u^g*hc9er70_5(%)$)ut8j&pqpupvg=2d0+kq2'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1"
+).split(",")
 
 
 # Application definition
@@ -139,9 +142,12 @@ SIMPLE_JWT = {
 # }
 
 DATABASES = {
-    'default': dj_database_url.parse("postgresql://neondb_owner:npg_Kxrd4G6pECga@ep-dawn-rice-a1ha7rdx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"),
+    "default": dj_database_url.parse(
+        os.environ.get("DATABASE_URL")
+    )
 }
-DATABASES['default']['CONN_MAX_AGE'] = 60
+
+DATABASES["default"]["CONN_MAX_AGE"] = 60
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
