@@ -18,12 +18,14 @@ function Navbar({ user, setUser }) {
   const handleLogout = async () => {
     try {
       await logout();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      // Always clear the local session, even if the server call failed
       localStorage.removeItem('access');
       localStorage.removeItem('refresh');
       setUser(null);
       navigate('/');
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -90,6 +92,18 @@ function Home() {
   );
 }
 
+function NotFound() {
+  return (
+    <div className="hero animate-fade-in">
+      <h1>404</h1>
+      <p>The page you are looking for does not exist.</p>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+        <Link to="/" className="btn btn-primary">Go Home</Link>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -126,6 +140,7 @@ function App() {
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/signup" element={<Signup setUser={setUser} />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
       </div>

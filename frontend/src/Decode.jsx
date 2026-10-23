@@ -27,7 +27,7 @@ export default function Decode() {
         const formData = new FormData();
         formData.append('cover_media', coverFile);
         formData.append('secret_key', password);
-        formData.append('method', 'LSB'); // Or make it selectable if needed
+        // No 'method' field: the backend detects whether LSB or DCT was used
 
         try {
             const res = await decodeImage(formData);

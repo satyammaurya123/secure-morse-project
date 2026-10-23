@@ -58,7 +58,6 @@ export default function Login({ setUser }) {
                 transition={{ duration: 0.6 }}
                 style={{
                     flex: 1,
-                    display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
                     padding: '4rem',

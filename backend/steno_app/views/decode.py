@@ -18,6 +18,28 @@ class DecodeView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    # A stego image doesn't record which method hid the data, so decoding tries each
+    # one. LSB is the default first try: it is far cheaper than DCT's per-block scan.
+    METHODS = ['LSB', 'DCT']
+
+    @staticmethod
+    def _extract_payload(img, method):
+        """Return the hidden salt+nonce+tag+ciphertext bytes, or None when this
+        method finds no well-formed payload in the image."""
+        try:
+            extracted_morse = StegoService.extract_message(img, method)
+            if not extracted_morse:
+                logger.info(f"{method}: no hidden message found")
+                return None
+            binary_payload = binascii.unhexlify(morse_to_text(extracted_morse))
+        except Exception as e:
+            logger.info(f"{method}: extraction failed: {str(e)}")
+            return None
+        if len(binary_payload) < 44:
+            logger.info(f"{method}: payload too short ({len(binary_payload)} bytes)")
+            return None
+        return binary_payload
+
     def post(self, request):
         logger.info(f"Decode request received from user '{request.user.username}'")
         serializer = DecodeRequestSerializer(data=request.data)
@@ -27,17 +49,17 @@ class DecodeView(APIView):
 
         try:
             secret_key = serializer.validated_data['secret_key']
-            method = serializer.validated_data.get('method', 'LSB')
+            requested_method = serializer.validated_data.get('method', 'LSB')
             
-            logger.debug(f"Using method: {method}")
+            logger.debug(f"Requested method: {requested_method}")
             
             image_file = request.FILES.get('cover_media') or request.FILES.get('image')
             if not image_file:
                 logger.error("Encoded media missing in decode request")
                 return Response({"error": "Encoded media is required."}, status=status.HTTP_400_BAD_REQUEST)
                 
-            if method not in ['LSB', 'DCT']:
-                logger.error(f"Invalid method selected: {method}")
+            if requested_method not in self.METHODS:
+                logger.error(f"Invalid method selected: {requested_method}")
                 return Response({"error": "Invalid steganography method selected."}, status=status.HTTP_400_BAD_REQUEST)
 
             try:
@@ -49,35 +71,27 @@ class DecodeView(APIView):
                 logger.error(f"Failed to open image for decoding: {str(e)}")
                 return Response({"error": "Unsupported image format."}, status=status.HTTP_400_BAD_REQUEST)
             
-            try:
-                logger.info(f"Extracting message using {method} method")
-                extracted_morse = StegoService.extract_message(img, method)
-                if not extracted_morse:
-                    logger.warning("No Morse message could be extracted (likely corrupted or wrong method/key)")
-                    return Response({"error": "Invalid key or corrupted image."}, status=status.HTTP_400_BAD_REQUEST)
-                logger.debug("Morse code extracted successfully")
-            except Exception as e:
-                logger.error(f"Message extraction failed: {str(e)}")
+            # Try the requested method first, then the rest: the image doesn't record
+            # which method hid the data, and older clients always send 'LSB'.
+            methods = [requested_method] + [m for m in self.METHODS if m != requested_method]
+            binary_payload = None
+            for method in methods:
+                binary_payload = self._extract_payload(img, method)
+                if binary_payload is not None:
+                    # A well-formed payload means this is the right method, so a failed
+                    # decryption below is a wrong password and other methods won't help.
+                    logger.info(f"Hidden payload found using {method} method")
+                    break
+            if binary_payload is None:
+                logger.warning("No hidden payload found with any method")
                 return Response({"error": "Invalid key or corrupted image."}, status=status.HTTP_400_BAD_REQUEST)
-            
+
             try:
-                hex_payload = morse_to_text(extracted_morse)
-                binary_payload = binascii.unhexlify(hex_payload)
-                logger.debug("Morse converted back to binary payload successfully")
-            except Exception as e:
-                logger.error(f"Morse conversion/unhexlify failed: {str(e)}")
-                return Response({"error": "Invalid key or corrupted image."}, status=status.HTTP_400_BAD_REQUEST)
-                
-            try:
-                if len(binary_payload) < 44:
-                    logger.warning(f"Binary payload too short: {len(binary_payload)} bytes")
-                    raise ValueError("Payload too short.")
-                    
                 salt = binary_payload[:16]
                 nonce = binary_payload[16:28]
                 tag = binary_payload[28:44]
                 ciphertext = binary_payload[44:]
-                
+
                 key, _ = KeyDerivation.derive_key(secret_key, salt)
                 decrypted_bytes = AESCipher.decrypt(ciphertext, key, nonce, tag)
                 logger.debug("Decryption successful")

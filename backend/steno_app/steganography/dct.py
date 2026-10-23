@@ -8,7 +8,27 @@ class DCTSteganography:
     Implements Discrete Cosine Transform (DCT) based Steganography.
     Hides data in the mid-frequency coefficients of 8x8 blocks.
     """
-    
+
+    @staticmethod
+    def _fit_to_pixel_range(block):
+        """
+        Pull an inverse-DCT block back into 0..255 without changing its hidden bits.
+        Plain clipping undoes the coefficient changes in near-white or near-black
+        areas (screenshots, scans) and corrupts the payload. Shifting the block only
+        changes its DC (brightness) term, and scaling around the mean multiplies every
+        AC coefficient by the same positive factor, so each v1-v2 keeps its sign.
+        """
+        lo, hi = block.min(), block.max()
+        if hi - lo > 255:
+            mean = block.mean()
+            block = mean + (block - mean) * (255.0 / (hi - lo))
+            lo, hi = block.min(), block.max()
+        if hi > 255:
+            block = block - (hi - 255)
+        elif lo < 0:
+            block = block - lo
+        return block
+
     @staticmethod
     def encode(image: Image.Image, message: str) -> Image.Image:
         # Convert PIL Image to OpenCV format (numpy array)
@@ -95,8 +115,8 @@ class DCTSteganography:
                     # Code removed and placed in block above
                     
                     # Inverse DCT
-                    idct_block = cv2.idct(dct_block)
-                    
+                    idct_block = DCTSteganography._fit_to_pixel_range(cv2.idct(dct_block))
+
                     # Create a copy of the block to update
                     channel[i*8:(i+1)*8, j*8:(j+1)*8] = idct_block
                 else:
@@ -107,8 +127,8 @@ class DCTSteganography:
         # Update the Blue channel
         img_float[:, :, channel_idx] = channel
         
-        # Clip values to 0-255 and convert back to uint8
-        img_out = np.clip(img_float, 0, 255)
+        # Clip values to 0-255 and round (not truncate) back to uint8
+        img_out = np.clip(np.round(img_float), 0, 255)
         img_out = np.uint8(img_out)
         
         return Image.fromarray(img_out)
