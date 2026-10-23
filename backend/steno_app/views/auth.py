@@ -24,6 +24,7 @@ class AuthStatusView(APIView):
         return Response({"authenticated": True, "username": request.user.username})
 
 class SignupView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -72,6 +73,7 @@ class SignupView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VerifyEmailView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -109,6 +111,7 @@ class VerifyEmailView(APIView):
             return Response({"error": "Invalid or expired verification code"}, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -139,8 +142,11 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(APIView):
+    # Logout needs no identity, so don't validate the token: an expired or
+    # rejected token must not block the user from logging out.
+    authentication_classes = []
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         # With stateless JWTs, logout is primarily a frontend action (deleting tokens).
         # Alternatively, we could blacklist the refresh token here.
@@ -148,6 +154,7 @@ class LogoutView(APIView):
         return Response({"success": "Logged out successfully"})
 
 class GoogleLoginView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -184,7 +191,19 @@ class GoogleLoginView(APIView):
                         last_name=' '.join(name.split()[1:]) if name else ''
                     )
                     logger.info(f"New user '{user.username}' created via Google signup")
-            
+
+            # An unfinished OTP signup leaves the account inactive. Google has verified
+            # the email, so activate it — and drop the password set during that signup,
+            # so whoever created it cannot log in with it (account pre-hijacking).
+            if not user.is_active:
+                if not idinfo.get('email_verified'):
+                    logger.warning(f"Google login refused for inactive user '{user.username}': email not verified")
+                    return Response({"error": "Google email is not verified"}, status=status.HTTP_403_FORBIDDEN)
+                user.is_active = True
+                user.set_unusable_password()
+                user.save(update_fields=['is_active', 'password'])
+                logger.info(f"Inactive user '{user.username}' activated via Google login")
+
             # Return JWT tokens
             refresh = RefreshToken.for_user(user)
             logger.info(f"User '{user.username}' logged in via Google successfully")
@@ -230,6 +249,7 @@ class DeleteAccountView(APIView):
         )
 
 class ForgotPasswordView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -269,6 +289,7 @@ class ForgotPasswordView(APIView):
             return Response({"error": "Failed to send email. Please try again later."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ResetPasswordView(APIView):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request):
